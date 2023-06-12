@@ -17,27 +17,39 @@ export const App = () => {
     ]
   );
 
+  const [filter, setFilter] = useState('');
+
   useEffect(() => {
     window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(contacts));
   }, [contacts]);
 
   const formSubmitHendler = ({ name, number }) => {
-    const id = nanoid();
-    const contactsLists = [...contacts];
-
-    if (contactsLists.findIndex(contact => name === contact.name) !== -1) {
-      alert(`${name} is already in contacts.`);
-    } else {
-      contactsLists.push({ name, id, number });
+    const findName = contacts.find(
+      contact => contact.name.toLowerCase() === name.toLowerCase()
+    );
+    if (findName) {
+      return alert(`${name} is already in contacts`);
     }
-    setContacts(contactsLists);
+
+    const findNumber = contacts.find(contact => contact.number === number);
+    if (findNumber) {
+      return alert(`This phone number is already in use.`);
+    }
+
+    const contact = {
+      id: nanoid(),
+      name: name,
+      number: number,
+    };
+
+    setContacts(prevState => [...prevState, contact]);
   };
 
-  const deleteContacts = e => {
-    setContacts(contacts.filter(contact => contact.id !== e));
+  const deleteContacts = contactId => {
+    setContacts(prevState =>
+      prevState.filter(contact => contact.id !== contactId)
+    );
   };
-
-   const [filter, setFilter] = useState('');
 
   const changeFilter = e => {
     const { value } = e.target;
@@ -45,10 +57,9 @@ export const App = () => {
   };
 
   const getVisibleFilter = () => {
-    const filterContactsList = contacts.filter(contact => {
-      return contact.name.toLowerCase().includes(filter.toLowerCase());
-    });
-    return filterContactsList;
+    return contacts.filter(contact => 
+      contact.name.toLowerCase().includes(filter.toLowerCase())
+    );
   };
 
   return (
@@ -77,3 +88,4 @@ export const App = () => {
     </div>
   );
 };
+
